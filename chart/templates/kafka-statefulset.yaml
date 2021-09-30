@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka-broker
+spec:
+  selector:
+    matchLabels:
+      app: kafka
+  replicas: 1
+  serviceName: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+        id: "0"
+    spec:
+      containers:
+        - name: kafka
+          image: confluentinc/cp-zookeeper:latest
+          ports:
+            - containerPort: 9092
+          env:
+            - name: KAFKA_ADVERTISED_PORT
+              value: "9092"
+            - name: KAFKA_ADVERTISED_HOST_NAME
+              value: kafka-service
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: zookeper:2888
+            - name: KAFKA_BROKER_ID
+              value: "0"
+            - name: KAFKA_CREATE_TOPICS
+              value: sample.topic:1:1
