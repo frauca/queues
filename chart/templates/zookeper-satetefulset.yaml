@@ -38,27 +38,11 @@ spec:
               name: server
             - containerPort: 3888
               name: leader-election
-          command:
-            - sh
-            - -c
-            - "start-zookeeper \
-          --servers=3 \
-          --data_dir=/var/lib/zookeeper/data \
-          --data_log_dir=/var/lib/zookeeper/data/log \
-          --conf_dir=/opt/zookeeper/conf \
-          --client_port=2181 \
-          --election_port=3888 \
-          --server_port=2888 \
-          --tick_time=2000 \
-          --init_limit=10 \
-          --sync_limit=5 \
-          --heap=512M \
-          --max_client_cnxns=60 \
-          --snap_retain_count=3 \
-          --purge_interval=12 \
-          --max_session_timeout=40000 \
-          --min_session_timeout=4000 \
-          --log_level=INFO"
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "2000"
           readinessProbe:
             exec:
               command:
@@ -75,17 +59,6 @@ spec:
                 - "zookeeper-ready 2181"
             initialDelaySeconds: 10
             timeoutSeconds: 5
-          volumeMounts:
-            - name: datadir
-              mountPath: /var/lib/zookeeper
       securityContext:
         runAsUser: 1000
         fsGroup: 1000
-  volumeClaimTemplates:
-    - metadata:
-        name: datadir
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 10Gi
