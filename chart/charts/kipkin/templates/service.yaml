@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kipkin.fullname" . }}
+  labels:
+    {{- include "kipkin.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      nodePort: 30080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "kipkin.selectorLabels" . | nindent 4 }}
