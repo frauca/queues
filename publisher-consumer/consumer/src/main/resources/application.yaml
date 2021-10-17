@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    function:
+      definition: justReactiveLog;justLog
+    stream:
+      bindings:
+        justReactiveLog-in-0:
+          destination: sample-topic
+          group: group1
+        justLog-in-0:
+          destination: sample-topic
+          group: group2
+      kafka:
+        binder:
+          brokers: kafka.cluster.local
+          defaultBrokerPort: 31090

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  labels:
+  {{- include "kafka.broker.labels" . | nindent 4 }}
+spec:
+  ports:
+  - name: broker
+    port: 9092
+    targetPort: kafka
+{{- if and .Values.prometheus.jmx.enabled .Values.prometheus.operator.enabled }}
+  - name: jmx-exporter
+    protocol: TCP
+    port: {{ .Values.jmx.port }}
+    targetPort: prometheus
+{{- end }}
+  type: {{ .Values.service.type }}
+  {{- if and (eq .Values.service.type "ClusterIP") (not (empty .Values.service.clusterIP)) }}
+  clusterIP: {{ .Values.service.clusterIP }}
+  {{- end }}
+  selector:
+  {{- include "kafka.broker.matchLabels" . | nindent 4 }}
+---
+{{- if and .Values.prometheus.kafka.enabled .Values.prometheus.operator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka.fullname" . }}-exporter
+  labels:
+  {{- include "kafka.monitor.labels" . | nindent 4 }}
+spec:
+  ports:
+  - name: kafka-exporter
+    protocol: TCP
+    port: {{ .Values.prometheus.kafka.port }}
+    targetPort: {{ .Values.prometheus.kafka.port }}
+  clusterIP: None
+  selector:
+  {{- include "kafka.monitor.matchLabels" . | nindent 4 }}
+{{- end }}

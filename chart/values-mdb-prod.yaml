@@ -9,7 +9,7 @@ replicas: 3
 image: "confluentinc/cp-kafka"
 
 ## The kafka image tag
-imageTag: "5.5.6"  # Confluent image for Kafka 2.0.0
+imageTag: "5.0.1"  # Confluent image for Kafka 2.0.0
 
 ## Specify a imagePullPolicy
 ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -17,13 +17,13 @@ imagePullPolicy: "IfNotPresent"
 
 ## Configure resource requests and limits
 ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-resources: {}
-  # limits:
-  #   cpu: 200m
-  #   memory: 1536Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 1024Mi
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
 kafkaHeapOptions: "-Xmx1G -Xms1G"
 
 ## Optional Container Security context
@@ -52,10 +52,7 @@ podManagementPolicy: OrderedReady
 #     - pass
 #   mountPath: /opt/zookeeper/secret
 
-## Service brokers type and definition
-service:
-  type: ClusterIP
-  clusterIP: None
+
 ## The subpath within the Kafka container's PV where logs will be stored.
 ## This is combined with `persistence.mountPath`, to create, by default: /opt/kafka/data/logs
 logSubPath: "logs"
@@ -143,7 +140,7 @@ headless:
 ## External access.
 ##
 external:
-  enabled: true
+  enabled: false
   # type can be either NodePort or LoadBalancer
   type: NodePort
   # annotations:
@@ -166,7 +163,8 @@ external:
     imagePullPolicy: "IfNotPresent"
 
 # Annotation to be added to Kafka pods
-podAnnotations: {}
+podAnnotations:
+  diamanti.com/endpoint0: '{"network":"ecx-508", "perfTier":"high"}'
 
 # Labels to be added to Kafka pods
 podLabels: {}
@@ -194,8 +192,8 @@ configurationOverrides:
   ##
   ## Setting "advertised.listeners" here appends to "PLAINTEXT://${POD_IP}:9092,", ensure you update the domain
   ## If external service type is Nodeport:
-  "advertised.listeners": |-
-   EXTERNAL://kafka.cluster.local:$((31090 + ${KAFKA_BROKER_ID}))
+  # "advertised.listeners": |-
+  #   EXTERNAL://kafka.cluster.local:$((31090 + ${KAFKA_BROKER_ID}))
   ## If external service type is LoadBalancer and distinct is true:
   # "advertised.listeners": |-
   #   EXTERNAL://kafka-$((${KAFKA_BROKER_ID})).cluster.local:19092
@@ -203,8 +201,8 @@ configurationOverrides:
   # "advertised.listeners": |-
   #   EXTERNAL://${LOAD_BALANCER_IP}:31090
   ## Uncomment to define the EXTERNAL Listener protocol
-  "listener.security.protocol.map": |-
-   PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+  # "listener.security.protocol.map": |-
+  #   PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
 
 ## set extra ENVs
 #   key: "value"
@@ -223,7 +221,7 @@ persistence:
   ## The size of the PersistentVolume to allocate to each Kafka Pod in the StatefulSet. For
   ## production servers this number should likely be much larger.
   ##
-  size: "8Gi"
+  size: "20Gi"
 
   ## The location within the Kafka container where the PV will mount its storage and Kafka will
   ## store its logs.
@@ -476,25 +474,30 @@ testsEnabled: true
 
 zookeeper:
   ## If true, install the Zookeeper chart alongside Kafka
-  ## ref: chart zookeeper in folder charts
+  ## ref: https://github.com/kubernetes/charts/tree/master/incubator/zookeeper
   enabled: true
 
+  replicaCount: 3
+  #clusterIP: None
   ## Configure Zookeeper resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  resources: ~
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 500Mi
 
-  service:
-    type: ClusterIP
-    clusterIP: None  # Turning this into None for deployment in Diamanti cluster due to Networking issue
   ## Environmental variables to set in Zookeeper
   env:
     ## The JVM heap size to allocate to Zookeeper
     ZK_HEAP_SIZE: "1G"
 
   persistence:
-    enabled: false
+    enabled: true
     ## The amount of PV storage allocated to each Zookeeper pod in the statefulset
-    # size: "2Gi"
+    size: "2Gi"
 
   ## Specify a Zookeeper imagePullPolicy
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -515,3 +518,5 @@ zookeeper:
   #       labelSelector:
   #         matchLabels:
   #           release: zookeeper
+  podAnnotations:
+    diamanti.com/endpoint0: '{"network":"ecx-508", "perfTier":"high"}'

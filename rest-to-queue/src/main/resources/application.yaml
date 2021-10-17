@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    stream:
+      source: justLog
+      bindings:
+        justLog:
+          destination: sample-topic
+      kafka:
+        binder:
+          brokers: kafka.cluster.local
+          defaultBrokerPort: 31090

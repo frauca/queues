@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        couldBeAnError-in-0:
+          destination: sample-topic
+          group: error
+          consumer:
+            maxAttempts: 3
+            backOffInitialInterval: 1000  # 5 seconds
+            backOffMaxInterval: 100000    # 100 seconds
+            backoffMultiplier: 1.0
+      kafka:
+        binder:
+          brokers: kafka.cluster.local
+          defaultBrokerPort: 31090
+        bindings:
+          couldBeAnError-in-0:
+            consumer:
+              maxAttempts: 3
+#              enableDlq: true
+#              dlqName: error-dlq
+#              dlqPartitions: 1

@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    function:
+      routing-expression: "T(java.lang.System).currentTimeMillis() % 2 == 0 ? 'even' : 'odd'"
+    stream:
+      bindings:
+        functionRouter-in-0:
+          destination: sample-topic
+          group: group1
+      kafka:
+        binder:
+          brokers: kafka.cluster.local
+          defaultBrokerPort: 31090
