@@ -10,3 +10,9 @@ buildNumber.properties
 # https://github.com/takari/maven-wrapper#usage-without-binary-jar
 .mvn/wrapper/maven-wrapper.jar
 /.idea/
+/error/error.iml
+/publisher-consumer/consumer/consumer.iml
+/publisher-consumer/publisher/publisher.iml
+/publisher-consumer/publisher-consumer.iml
+/rest-to-queue/rest-to-queue.iml
+/routing/routing.iml
